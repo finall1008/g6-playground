@@ -15,10 +15,8 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+## 说明
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Flok 大作业成员用 G6 库测试项目。
+
+请用一个页面完成一项测试，并添加路由规则、在 [`Nav`](src/components/Nav.vue) 组件添加链接。
