@@ -73,6 +73,7 @@ export default {
             [0.5, 0],
             [0.5, 1],
           ],
+          layerType: "test",
         },
         defaultEdge: {
           style: {
@@ -116,6 +117,7 @@ export default {
     // 是否允许开始拖拽连边
     createEdgeShouldBegin(e) {
       let node = e.item;
+      console.log(node);
       if (
         Math.abs(e.y - (node.get("model").y + 50)) <= 20 && // 拖拽节点下部触发
         // 当前节点还没有出边
