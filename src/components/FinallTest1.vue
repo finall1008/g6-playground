@@ -2,7 +2,7 @@
   <div id="test1">
     <div>
       <h4>Finall Test 1</h4>
-      <p>测试 create-edge 是否能与 anchorPoints 配合</p>
+      <p>Flok 编辑页面画布 Demo</p>
     </div>
     <div id="mountNode"></div>
   </div>
@@ -10,6 +10,7 @@
 
 <script>
 import G6 from "@antv/g6";
+const { detectAllCycles } = G6.Algorithm;
 
 export default {
   name: "FinallTest1",
@@ -112,37 +113,59 @@ export default {
       this.graph.on("aftercreateedge", this.afterCreateEdge);
       this.graph.render();
     },
+    // 是否允许开始拖拽连边
     createEdgeShouldBegin(e) {
       let node = e.item;
-      console.log(node, node.getOutEdges(), node.getInEdges()); // TODO：无论如何都为空
       if (
-        Math.abs(e.y - (node.get("model").y + 50)) <= 20 &&
-        node.getOutEdges().length === 0
+        Math.abs(e.y - (node.get("model").y + 50)) <= 20 && // 拖拽节点下部触发
+        // 当前节点还没有出边
+        // getOutEdges() 不知道为什么总为空，这样解决了
+        node.getEdges().filter((edge) => {
+          return edge.getSource().get("model").id === node.get("model").id;
+        }).length === 0
       ) {
-        // this.setMode("creatingEdge");
         return true;
       }
       return false;
     },
     createEdgeShouldEnd(e) {
       let node = e.item;
-      if (node.getInEdges().length === 0) return true;
+      if (
+        // 当前节点还没有入边
+        // getInEdges() 不知道为什么总为空，这样解决了
+        node.getEdges().filter((edge) => {
+          return edge.getTarget().get("model").id === node.get("model").id;
+        }).length === 0
+      ) {
+        return true;
+      }
       return false;
     },
     dragNodeShouldBegin(e) {
       let node = e.item;
       if (Math.abs(e.y - (node.get("model").y + 50)) <= 20) {
-        // this.setMode("creatingEdge");
+        // 拖拽节点上部触发
         return false;
       }
       return true;
     },
     afterCreateEdge(e) {
       let edge = e.edge;
-      edge.update({
-        sourceAnchor: 1,
-        targetAnchor: 0,
-      });
+      this.graphData = this.graph.save();
+      // 不允许成环
+      if (detectAllCycles(this.graphData, true).length !== 0) {
+        // 延时删除，防止报错
+        setTimeout(() => {
+          this.graph.removeItem(edge);
+          this.graphData = this.graph.save();
+        }, 100);
+      } else {
+        // 吸附到正确的 anchorPoint
+        edge.update({
+          sourceAnchor: 1,
+          targetAnchor: 0,
+        });
+      }
     },
   },
 };
